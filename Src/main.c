@@ -29,7 +29,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "bsp_eeprom.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -97,7 +97,12 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_UART_Transmit(&huart1, 'A', 1, HAL_MAX_DELAY);
+  HAL_UART_Transmit(&huart1, 'B', 1, HAL_MAX_DELAY);
+  eeprom_Test();
+  printf("program start\r\n");
 
   /* USER CODE END 2 */
 

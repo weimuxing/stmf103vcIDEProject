@@ -58,8 +58,27 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SPI1_CS_Pin GPIO_PIN_4
+#define SPI1_CS_GPIO_Port GPIOA
+#define IIC_SCL_A_Pin GPIO_PIN_4
+#define IIC_SCL_A_GPIO_Port GPIOC
+#define IIC_SDA_A_Pin GPIO_PIN_5
+#define IIC_SDA_A_GPIO_Port GPIOC
+#define GPIOD_EXTI15_Pin GPIO_PIN_15
+#define GPIOD_EXTI15_GPIO_Port GPIOD
+#define IIC_SCL_B_Pin GPIO_PIN_8
+#define IIC_SCL_B_GPIO_Port GPIOC
+#define IIC_SDA_B_Pin GPIO_PIN_9
+#define IIC_SDA_B_GPIO_Port GPIOC
+#define USB_PWR_Pin GPIO_PIN_8
+#define USB_PWR_GPIO_Port GPIOA
+#define Status_LED_Pin GPIO_PIN_8
+#define Status_LED_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+typedef enum
+{
+	false = 0, true,
+} bool;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
