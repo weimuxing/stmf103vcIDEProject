@@ -8,8 +8,8 @@
 #include "main.h"
 #include "iic_Interface.h"
 
-#define PIN_HIGH GPIO_PIN_RESET
-#define PIN_LOW  GPIO_PIN_SET
+#define PIN_HIGH GPIO_PIN_SET
+#define PIN_LOW  GPIO_PIN_RESET
 
 #define IIC_PORT_A IIC_SCL_A_GPIO_Port,IIC_SDA_A_GPIO_Port,IIC_SCL_A_Pin,IIC_SDA_A_Pin
 #define IIC_PORT_B IIC_SCL_B_GPIO_Port,IIC_SDA_B_GPIO_Port,IIC_SCL_B_Pin,IIC_SCL_B_Pin
@@ -18,7 +18,8 @@
 #define IIC_SDA_SET(x) HAL_GPIO_WritePin(iicPortConfig[iicPortSel].SDAGPIOx,iicPortConfig[iicPortSel].SDAGPIO_Pin,x)
 #define IIC_SCL_GET    HAL_GPIO_ReadPin(iicPortConfig[iicPortSel].SCLGPIOx,iicPortConfig[iicPortSel].SCLGPIO_Pin)
 #define ICI_SDA_GET	   HAL_GPIO_ReadPin(iicPortConfig[iicPortSel].SDAGPIOx,iicPortConfig[iicPortSel].SDAGPIO_Pin)
-
+#define IIC_SCL_INPUT IIC_SCL_SET(PIN_HIGH)
+#define IIC_SDA_INPUT IIC_SDA_SET(PIN_HIGH)
 
 typedef enum
 {
@@ -54,7 +55,7 @@ void iicPortSelSet(uint8_t portx)
 
 void iic_Delay()
 {
-	uint16_t tim = 7 * 10;
+	uint16_t tim = 10 * 5;
 	while (tim--)
 	{
 
@@ -71,6 +72,7 @@ bool iic_Start(void)
 
 	if ((IIC_SCL_GET == PIN_LOW) || (ICI_SDA_GET == PIN_LOW))
 	{
+		printf("ERR:IIC start fail\r\n");
 		iSFlag = false;
 		return iSFlag;
 	}
@@ -94,6 +96,10 @@ bool iic_Write(uint8_t data)
 		{
 			IIC_SDA_SET(PIN_HIGH);
 		}
+		else
+		{
+			IIC_SDA_SET(PIN_LOW);
+		}
 
 		iic_Delay();
 		IIC_SCL_SET(PIN_HIGH);
@@ -102,6 +108,7 @@ bool iic_Write(uint8_t data)
 		wFlag >>= 1;
 	}
 
+	IIC_SDA_INPUT;
 	iic_Delay();
 	IIC_SCL_SET(PIN_HIGH);
 	iic_Delay();
@@ -115,39 +122,37 @@ bool iic_Write(uint8_t data)
 	return wAck;
 }
 
-uint8_t iic_Read(bool rAck)
+uint8_t iic_Read(uint32_t rAck)
 {
 	uint8_t wFlag = 0x80;
-	uint8_t rData;
+	uint8_t rData = 0x00;
 
+	IIC_SDA_INPUT;
 	while (wFlag)
 	{
-		iic_Delay();
-		IIC_SCL_SET(PIN_HIGH);
-
 		if (ICI_SDA_GET == PIN_HIGH)
 		{
 			rData |= wFlag;
 		}
-		else
-		{
 
-		}
-
+		iic_Delay();
+		IIC_SCL_SET(PIN_HIGH);
 		iic_Delay();
 		IIC_SCL_SET(PIN_LOW);
 		wFlag >>= 1;
 	}
 
-	iic_Delay();
-	if (rAck == true)
+	if (rAck == 0)
 	{
-		IIC_SDA_SET(PIN_LOW);
+		printf("T\r\n");
+		IIC_SDA_SET(PIN_HIGH);
 	}
 	else
 	{
+		printf("N\r\n");
 		IIC_SDA_SET(PIN_HIGH);
 	}
+	iic_Delay();
 
 	IIC_SCL_SET(PIN_HIGH);
 	iic_Delay();

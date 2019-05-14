@@ -11,6 +11,6 @@
 bool iic_Start(void);
 bool iic_Write(uint8_t data);
 void iic_Stop(void);
-uint8_t iic_Read(bool rAck);
+uint8_t iic_Read(uint32_t rAck);
 
 #endif /* INC_IIC_INTERFACE_H_ */

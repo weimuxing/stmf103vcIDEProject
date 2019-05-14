@@ -86,14 +86,15 @@ static bool eeprom_Access_Start(AT24CXXChip at24cxxChip, uint8_t chipAddr,
 
 	if (trans_t == I2C_TRANS_WRITE)
 	{
-		blk_addr |= 0x01;
+		chipAddr &= (~0x01);
 	}
 	else
 	{
-		blk_addr &= (~0x01);
+		chipAddr |= 0x01;
 	}
 
 	easFlag = iic_Write(chipAddr);
+	printf("chipAddr:%#x\r\n", chipAddr);
 	return easFlag;
 }
 
@@ -106,6 +107,7 @@ static bool eeprom_Write(AT24CXXChip at24cxxChip, uint8_t chipAddr,
 			I2C_TRANS_WRITE);
 	if (ewFlag == false)
 	{
+		printf("ERR:ewAccess fail\r\n");
 		goto EROMW_LOOP;
 	}
 
@@ -169,35 +171,40 @@ static bool eeprom_Read(AT24CXXChip at24cxxChip, uint8_t chipAddr,
 	}
 
 	erFlag = eeprom_Access_Start(at24cxxChip, chipAddr, blk_addr,
-			I2C_TRANS_WRITE);
+			I2C_TRANS_READ);
 	if (erFlag == false)
 	{
 		goto EROMR_LOOP;
 	}
 	while (blk_len)
 	{
-		blk_len--;
 		*buf = iic_Read((bool) blk_len);
+		blk_len--;
 		buf++;
-
 	}
 
 	EROMR_LOOP: iic_Stop();
+
+	if (erFlag == false)
+	{
+		printf("Err:erFlag false\r\n");
+	}
 	return erFlag;
 }
 
 void eeporm_Write_Size(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
 		uint16_t blk_len)
 {
+	bool ewsAck = true;
 	uint8_t chipAddr;
 	uint16_t chipPageSize;
 	uint32_t chipSize;
 	AT24CXXChip at24cxxChip;
-	uint16_t curPage;
 	uint16_t remainSize;
 
-	if (at24cxxChipPortSet((AT24CXXChipPort) lun))
+	if (at24cxxChipPortSet((AT24CXXChipPort) lun) == false)
 	{
+		printf("ERR:ews chip error\r\n");
 		return;
 	}
 
@@ -205,39 +212,53 @@ void eeporm_Write_Size(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
 	chipPageSize = at24cxxConfig[AT24CXX_A].chipPageSize;
 	chipSize = at24cxxConfig[AT24CXX_A].chipSize;
 	at24cxxChip = at24cxxConfig[AT24CXX_A].at24cxxChip;
-	curPage = blk_addr / chipPageSize;
-	remainSize = blk_addr % chipPageSize;
+	remainSize = chipPageSize - blk_addr % chipPageSize;
+
+	printf(
+			"chipAddr:%#x chipPageSize:%#x chipSize:%#x at24cxxChip:%#x remainSize:%#x blk_len%d\r\n",
+			chipAddr, chipPageSize, chipSize, (uint32_t) at24cxxChip,
+			remainSize, blk_len);
 
 	if (blk_addr > chipSize)
 	{
+		printf("ERR:ews addr cross the border\r\n");
 		return;
 	}
 
-	if (remainSize)
+	if (remainSize >= blk_len)
 	{
-		//TODO
-		eeprom_Write(at24cxxChip, chipAddr, blk_addr, buf, blk_len);
-		blk_len -= remainSize;
+		remainSize = blk_len;
 	}
 
 	while (blk_len)
 	{
-		if (blk_len <= remainSize)
+		//TODO
+		ewsAck = eeprom_Write(at24cxxChip, chipAddr, blk_addr, buf, remainSize);
+		printf("wblk_addr:%x\r\n\r\n",blk_addr);
+
+		if (remainSize >= blk_len)
 		{
+			blk_len = 0;
 			remainSize = blk_len;
-			blk_len -= remainSize;
 		}
 		else
 		{
-			remainSize = chipPageSize;
 			blk_len -= remainSize;
+			buf += remainSize;
+			blk_addr += remainSize;
+			remainSize = chipPageSize;
 		}
-		//TODO
-		eeprom_Write(at24cxxChip, chipAddr, blk_addr, buf, blk_len);
-		curPage++;
-		HAL_Delay(10);
-	}
 
+		HAL_Delay(10);
+		if (ewsAck == false)
+		{
+			printf("blk_addr:%#lx\r\n", blk_addr);
+		}
+	}
+	if (ewsAck == false)
+	{
+		printf("ERR:ewsAckerrblk_addr:%#lx\r\n", blk_addr);
+	}
 }
 
 void eeporm_Read_Size(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
@@ -247,11 +268,12 @@ void eeporm_Read_Size(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
 	uint16_t chipPageSize;
 	uint32_t chipSize;
 	AT24CXXChip at24cxxChip;
-	uint16_t curPage;
 	uint16_t remainSize;
+	bool ersAck = true;
 
-	if (at24cxxChipPortSet((AT24CXXChipPort) lun))
+	if (at24cxxChipPortSet((AT24CXXChipPort) lun) == false)
 	{
+		printf("ERR:ers chip error\r\n");
 		return;
 	}
 
@@ -259,61 +281,74 @@ void eeporm_Read_Size(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
 	chipPageSize = at24cxxConfig[AT24CXX_A].chipPageSize;
 	chipSize = at24cxxConfig[AT24CXX_A].chipSize;
 	at24cxxChip = at24cxxConfig[AT24CXX_A].at24cxxChip;
-	curPage = blk_addr / chipPageSize;
 	remainSize = blk_addr % chipPageSize;
+
+	printf(
+			"chipAddr:%#x chipPageSize:%#x chipSize:%#x at24cxxChip:%#x remainSize:%ld blk_len:%d\r\n",
+			chipAddr, chipPageSize, chipSize, (uint32_t) at24cxxChip,
+			remainSize, blk_len);
 
 	if (blk_addr > chipSize)
 	{
 		return;
 	}
-	if (remainSize)
-	{
-		//TODO
-		eeprom_Write(at24cxxChip, chipAddr, blk_addr, buf, blk_len);
-		blk_len -= remainSize;
-	}
 
 	while (blk_len)
 	{
-		if (blk_len <= remainSize)
+		//TODO
+		eeprom_Read(at24cxxChip, chipAddr, blk_addr, buf, remainSize);
+		printf("Rblk_addr:%x\r\n\r\n",blk_addr);
+
+		if (remainSize >= blk_len)
 		{
+			blk_len = 0;
 			remainSize = blk_len;
-			blk_len -= remainSize;
 		}
 		else
 		{
-			remainSize = chipPageSize;
 			blk_len -= remainSize;
+			buf += remainSize;
+			blk_addr += remainSize;
+			remainSize = chipPageSize;
 		}
-		//TODO
-		eeprom_Read(at24cxxChip, chipAddr, blk_addr, buf, blk_len);
-		curPage++;
-		HAL_Delay(10);
 
+		HAL_Delay(10);
+	}
+	if (ersAck == false)
+	{
+		printf("ERR:ewsAckerrblk_addr:%#lx\r\n", blk_addr);
 	}
 }
 
-uint8_t eeprom_TestData[256] =
+uint8_t eeprom_TestData[2] =
 { 0, };
 
 void eeprom_Test()
 {
-	uint8_t etTmp = 0;
-
-	for (; etTmp < sizeof(eeprom_TestData); etTmp++)
-	{
-		eeprom_TestData[etTmp] = etTmp;
-	}
-	eeporm_Write_Size(AT24CXX_A, eeprom_TestData, 0x00,sizeof(eeprom_TestData));
-	memset(eeprom_TestData, 0x00, sizeof(eeprom_TestData));
-	eeporm_Read_Size(AT24CXX_A, eeprom_TestData, 0x00, sizeof(eeprom_TestData));
-
+	uint16_t etTmp = 0;
+	printf("eeprom_Test\r\n");
 	for (etTmp = 0; etTmp < sizeof(eeprom_TestData); etTmp++)
 	{
-		if(etTmp%0x0F == 0)
+		if (etTmp % 0x10 == 0)
 		{
 			printf("\r\n");
 		}
-		printf("%x ",eeprom_TestData[etTmp]);
+		eeprom_TestData[etTmp] = etTmp+5;
+		printf("%d ", eeprom_TestData[etTmp]);
+	}
+	printf("write\r\n");
+	eeporm_Write_Size(AT24CXX_A, eeprom_TestData, 0x10,
+			sizeof(eeprom_TestData));
+	memset(eeprom_TestData, 0x00, sizeof(eeprom_TestData));
+	printf("read\r\n");
+	eeporm_Read_Size(AT24CXX_A, eeprom_TestData, 0x11, sizeof(eeprom_TestData));
+
+	for (etTmp = 0; etTmp < sizeof(eeprom_TestData); etTmp++)
+	{
+		if (etTmp % 0x0F == 0)
+		{
+			printf("\r\n");
+		}
+		printf("%x ", eeprom_TestData[etTmp]);
 	}
 }

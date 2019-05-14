@@ -99,8 +99,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Transmit(&huart1, 'A', 1, HAL_MAX_DELAY);
-  HAL_UART_Transmit(&huart1, 'B', 1, HAL_MAX_DELAY);
+  printf("program start\r\n");
+
   eeprom_Test();
   printf("program start\r\n");
 

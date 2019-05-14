@@ -168,8 +168,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 } 
 
 /* USER CODE BEGIN 1 */
-#include "stdio.h"
-#ifdef __GNUC__
+
 #define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
 PUTCHAR_PROTOTYPE
 {
@@ -177,8 +176,15 @@ PUTCHAR_PROTOTYPE
   HAL_UART_Transmit(&huart1, (uint8_t*)&ch, 1, HAL_MAX_DELAY);
   return ch;
 }
-#endif
-
+int _write(int file, char *ptr, int len)
+{
+      int DataIdx;
+      for (DataIdx = 0; DataIdx < len;DataIdx++)
+     {
+           __io_putchar(*ptr++);
+     }
+      return len;
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
