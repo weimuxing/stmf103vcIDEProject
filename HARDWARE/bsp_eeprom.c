@@ -10,7 +10,10 @@
 #include "iic_Interface.h"
 #include <string.h>
 
+#define EEPROM_DEBUG(x) x
+
 #define AT24CXX_INFO_A 0xA0,32,(64/8*1024),AT24C64
+
 
 typedef enum
 {
@@ -178,7 +181,7 @@ static bool eeprom_Read(AT24CXXChip at24cxxChip, uint8_t chipAddr,
 	}
 	while (blk_len)
 	{
-		*buf = iic_Read((bool) blk_len);
+		*buf = iic_Read( blk_len);
 		blk_len--;
 		buf++;
 	}
@@ -234,7 +237,7 @@ void eeporm_Write_Size(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
 	{
 		//TODO
 		ewsAck = eeprom_Write(at24cxxChip, chipAddr, blk_addr, buf, remainSize);
-		printf("wblk_addr:%x\r\n\r\n",blk_addr);
+		printf("wblk_addr:%x\r\n\r\n", blk_addr);
 
 		if (remainSize >= blk_len)
 		{
@@ -292,17 +295,21 @@ void eeporm_Read_Size(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
 	{
 		return;
 	}
+	if (remainSize >= blk_len)
+	{
+		remainSize = blk_len;
+	}
 
 	while (blk_len)
 	{
 		//TODO
 		eeprom_Read(at24cxxChip, chipAddr, blk_addr, buf, remainSize);
-		printf("Rblk_addr:%x\r\n\r\n",blk_addr);
+		printf("Rblk_addr:%x\r\n\r\n", blk_addr);
 
 		if (remainSize >= blk_len)
 		{
-			blk_len = 0;
 			remainSize = blk_len;
+			blk_len = 0;
 		}
 		else
 		{
@@ -320,7 +327,7 @@ void eeporm_Read_Size(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
 	}
 }
 
-uint8_t eeprom_TestData[2] =
+uint8_t eeprom_TestData[3] =
 { 0, };
 
 void eeprom_Test()
@@ -333,7 +340,7 @@ void eeprom_Test()
 		{
 			printf("\r\n");
 		}
-		eeprom_TestData[etTmp] = etTmp+5;
+		eeprom_TestData[etTmp] = etTmp + 10;
 		printf("%d ", eeprom_TestData[etTmp]);
 	}
 	printf("write\r\n");
@@ -341,7 +348,10 @@ void eeprom_Test()
 			sizeof(eeprom_TestData));
 	memset(eeprom_TestData, 0x00, sizeof(eeprom_TestData));
 	printf("read\r\n");
-	eeporm_Read_Size(AT24CXX_A, eeprom_TestData, 0x11, sizeof(eeprom_TestData));
+	eeporm_Read_Size(AT24CXX_A, eeprom_TestData, 0x10, sizeof(eeprom_TestData));
+//	eeporm_Read_Size(AT24CXX_A, &eeprom_TestData[0], 0x10,1);
+//	eeporm_Read_Size(AT24CXX_A, &eeprom_TestData[1], 0x11,1);
+//	eeporm_Read_Size(AT24CXX_A, &eeprom_TestData[2], 0x12,1);
 
 	for (etTmp = 0; etTmp < sizeof(eeprom_TestData); etTmp++)
 	{

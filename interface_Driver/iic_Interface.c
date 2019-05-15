@@ -144,13 +144,11 @@ uint8_t iic_Read(uint32_t rAck)
 
 	if (rAck == 0)
 	{
-		printf("T\r\n");
 		IIC_SDA_SET(PIN_HIGH);
 	}
 	else
 	{
-		printf("N\r\n");
-		IIC_SDA_SET(PIN_HIGH);
+		IIC_SDA_SET(PIN_LOW);
 	}
 	iic_Delay();
 
