@@ -74,7 +74,7 @@ void deep_power_Down()
 	SPI1_CS_HIGH;
 }
 
-void page_Program(uint32_t blk_addr, uint32_t blk_len, uint8_t *buf)
+void page_Program(uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 {
 	uint8_t commond = 0x06;
 	SPI1_CS_LOW;
@@ -84,7 +84,7 @@ void page_Program(uint32_t blk_addr, uint32_t blk_len, uint8_t *buf)
 	SPI1_CS_HIGH;
 }
 
-void read_Data(uint32_t blk_addr, uint32_t blk_len, uint8_t *buf)
+void read_Data(uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 {
 	uint8_t commond = 0x03;
 	SPI1_CS_LOW;
@@ -98,6 +98,7 @@ void read_Manufacturer_Device_ID()
 {
 	uint8_t pRxTxData[3];
 	uint8_t data = 0x90;
+
 	SPI1_CS_LOW;
 	HAL_SPI_Transmit(&hspi1, &data, 1, 0xFFFF);
 	HAL_SPI_Transmit(&hspi1, pRxTxData, 2, 0xFFFF);
@@ -110,6 +111,7 @@ void read_Identification()
 {
 	uint8_t data = 0x9F;
 	uint8_t pRxTxData[3];
+
 	SPI1_CS_LOW;
 	HAL_SPI_Transmit(&hspi1, &data, 1, 0xFFFF);
 	HAL_SPI_TransmitReceive(&hspi1, pRxTxData, pRxTxData, 3, 0xFFFF);
@@ -117,46 +119,123 @@ void read_Identification()
 	printf("flashID:%x %x %x\r\n", pRxTxData[0], pRxTxData[1], pRxTxData[2]);
 }
 
-// commond
+
+void flash_Write_Block(uint8_t lun, uint8_t *buf, uint32_t blk_addr,
+		uint32_t blk_len)
+{
+	uint16_t remainPage;
+
+	remainPage = FLASH_PAGE_LEN - blk_addr % FLASH_PAGE_LEN;
+
+	if (remainPage > blk_len)
+	{
+		remainPage = blk_len;
+	}
+
+	while (blk_len)
+	{
+		page_Program(buf, blk_addr, remainPage);
+
+		buf += remainPage;
+		blk_addr += remainPage;
+		blk_len -= remainPage;
+
+		if (blk_len > FLASH_PAGE_LEN)
+		{
+			remainPage = FLASH_PAGE_LEN;
+		}
+		else
+		{
+			remainPage = blk_len;
+		}
+
+	}
+
+}
 
 void flash_Write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 {
-uint16_t fwTmp = 0;
-uint16_t remainSector = 0;
-uint16_t curSector;
+	uint32_t curSector;
+	uint32_t remainSector = 0;
 
-curSector = blk_addr / FLASH_SECORT_LEN;
-remainSector = FLASH_SECORT_LEN - blk_addr % FLASH_SECORT_LEN;
+	curSector = blk_addr / FLASH_SECORT_LEN;
+	remainSector = FLASH_SECORT_LEN - blk_addr % FLASH_SECORT_LEN;
 
-if (blk_len < remainSector)
-{
-	blk_len = remainSector;
+	if (blk_len < remainSector)
+	{
+		blk_len = remainSector;
+	}
+
+	while (blk_len)
+	{
+		if (blk_len < FLASH_SECORT_LEN)
+		{
+			read_Data(eeprom_Cache, curSector * FLASH_SECORT_LEN,
+			FLASH_SECORT_LEN);
+			memcpy((eeprom_Cache + blk_addr % FLASH_SECORT_LEN), buf,
+					remainSector);
+			sector_Erase(blk_addr);
+		}
+		else if (remainSector == FLASH_BLOCK_LEN)
+		{
+			//TODO: erase block function
+		}
+		else
+		{
+			sector_Erase(blk_addr);
+		}
+
+		if (remainSector == FLASH_SECORT_LEN)
+		{
+			flash_Write_Block(lun, buf, blk_addr, remainSector);
+		}
+		else if (remainSector < FLASH_SECORT_LEN)
+		{
+			flash_Write_Block(lun, eeprom_Cache, blk_addr, remainSector);
+		}
+		else
+		{
+			flash_Write_Block(lun, buf, blk_addr, remainSector);
+		}
+
+		buf += remainSector;
+		blk_len -= remainSector;
+
+		if (blk_len >= FLASH_BLOCK_LEN)
+		{
+			remainSector = FLASH_BLOCK_LEN;
+		}
+		else if (blk_len > FLASH_SECORT_LEN)
+		{
+			remainSector = FLASH_SECORT_LEN;
+		}
+		else
+		{
+			remainSector = blk_len;
+		}
+	}
 }
 
-while (blk_len)
+void flash_Test()
 {
-	if (remainSector < FLASH_SECORT_LEN)
+	uint16_t tmp;
+	for (tmp = 0; tmp < sizeof(eeprom_Cache); tmp++)
 	{
-		read_Data(curSector * FLASH_SECORT_LEN, FLASH_SECORT_LEN, eeprom_Cache);
-		memcpy((eeprom_Cache + blk_addr % FLASH_SECORT_LEN), buf, remainSector);
-	}
-	else
-	{
-		memcpy(eeprom_Cache, buf, remainSector);
-	}
-	sector_Erase(blk_addr);
-
-	for (fwTmp = 0; fwTmp < FLASH_BLOCK_LEN / FLASH_SECORT_LEN; fwTmp++)
-	{
-		page_Program((blk_addr + fwTmp * FLASH_PAGE_LEN), FLASH_PAGE_LEN,
-				(eeprom_Cache + fwTmp * FLASH_PAGE_LEN));
+		eeprom_Cache[tmp] = tmp % 0x100;
 	}
 
-	buf += remainSector;
-	blk_len -= remainSector;
-	remainSector = FLASH_SECORT_LEN;
+	flash_Write(0x00, eeprom_Cache, 0x1010, sizeof(eeprom_Cache));
+	memset(eeprom_Cache, 0x00, sizeof(eeprom_Cache));
+	read_Data(eeprom_Cache, 0x1010, sizeof(eeprom_Cache));
 
-}
+	for (tmp = 0; tmp < sizeof(eeprom_Cache); tmp++)
+	{
+		if (tmp % 0x20 == 0)
+		{
+			printf("\r\n");
+		}
+		printf("%x ", eeprom_Cache[tmp]);
 
+	}
 }
 
