@@ -8,6 +8,11 @@
 #ifndef INC_IIC_INTERFACE_H_
 #define INC_IIC_INTERFACE_H_
 
+typedef enum
+{
+	I2C_TRANS_READ, I2C_TRANS_WRITE
+} I2cIoTransType;
+
 bool iic_Start(void);
 bool iic_Write(uint8_t data);
 void iic_Stop(void);

@@ -101,9 +101,10 @@ int main(void)
   /* USER CODE BEGIN 2 */
   printf("program start\r\n");
 
-  eeprom_Test();
+  //eeprom_Test();
+  read_Manufacturer_Device_ID();
   printf("program start\r\n");
-
+  read_Identification();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
