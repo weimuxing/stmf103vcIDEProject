@@ -103,8 +103,9 @@ int main(void)
 
   //eeprom_Test();
   read_Manufacturer_Device_ID();
-  printf("program start\r\n");
-  read_Identification();
+
+  flash_Test();
+  printf("program end\r\n");
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
