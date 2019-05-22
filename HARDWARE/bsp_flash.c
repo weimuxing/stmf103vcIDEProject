@@ -33,12 +33,6 @@ extern SPI_HandleTypeDef hspi1;
 
 static uint32_t _flashWaitTime = PAGEPROGRAMTIME;
 static uint32_t curSysTick;
-//static uint32_t page_Program_Time;
-//static uint32_t sector_Erase_Time;
-//static uint32_t block_Erase_Time;
-//static uint32_t chip_Erase_Time;
-//static uint32_t write_StatusRegister_Time;
-
 static uint8_t eeprom_Cache[0x1000];
 
 void SPI_Transmit(uint8_t* pData, uint16_t Size, uint32_t Timeout)
@@ -105,11 +99,11 @@ bool status_Register_WIP_Wait()
 			return true;
 		}
 
-		if (msAPI_Timer_DiffTime_2(curSysTick, HAL_GetTick()) > _flashWaitTime)
-		{
-			curSysTick = HAL_GetTick();
-			return false;
-		}
+//		if (msAPI_Timer_DiffTime_2(curSysTick, HAL_GetTick()) > _flashWaitTime)
+//		{
+//			curSysTick = HAL_GetTick();
+//			return false;
+//		}
 	}
 	return false;
 }
@@ -118,16 +112,17 @@ void sector_Erase(uint32_t blk_addr)
 {
 	uint8_t commond = 0x20;
 
-	_flashWaitTime = SECTORERASETIME;
-
+	status_Register_WIP_Wait();
 	write_Enable();
 	BIG2LITTLE32(blk_addr);
-	status_Register_WIP_Wait();
+
 
 	SPI1_CS_LOW;
 	SPI_Transmit((uint8_t*) &commond, 1, 0xFF);
 	SPI_Transmit((uint8_t*) &blk_addr + 1, 3, 0xFF);
 	SPI1_CS_HIGH;
+
+	_flashWaitTime = SECTORERASETIME;
 
 }
 
@@ -135,16 +130,17 @@ void block_Erase(uint32_t blk_addr)
 {
 	uint8_t commond = 0xD8;
 
-	_flashWaitTime = BLOCKERASETIME;
-
+	status_Register_WIP_Wait();
 	write_Enable();
 	BIG2LITTLE32(blk_addr);
-	status_Register_WIP_Wait();
+
 
 	SPI1_CS_LOW;
 	SPI_Transmit((uint8_t*) &commond, 1, 0xFF);
 	SPI_Transmit((uint8_t*) &blk_addr + 1, 3, 0xFF);
 	SPI1_CS_HIGH;
+
+	_flashWaitTime = BLOCKERASETIME;
 
 }
 
@@ -161,16 +157,19 @@ void page_Program(uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 	uint8_t commond = 0x02;
 
 	printf("ppaddr:%x\r\n",blk_addr);
-	write_Enable();
-	_flashWaitTime = PAGEPROGRAMTIME;
-	BIG2LITTLE32(blk_addr);
 	status_Register_WIP_Wait();
+
+	write_Enable();
+	BIG2LITTLE32(blk_addr);
+
 
 	SPI1_CS_LOW;
 	SPI_Transmit(&commond, 1, 0xFF);
 	SPI_Transmit((uint8_t*) &blk_addr + 1, 3, 0xFF);
 	SPI_Transmit(buf, blk_len, 0xFFFF);
 	SPI1_CS_HIGH;
+
+	_flashWaitTime = PAGEPROGRAMTIME;
 
 }
 
