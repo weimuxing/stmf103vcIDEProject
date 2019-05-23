@@ -102,9 +102,25 @@ int main(void)
   printf("program start\r\n");
 
   //eeprom_Test();
-  read_Manufacturer_Device_ID();
+  //read_Manufacturer_Device_ID();
+  uint32_t curTime = HAL_GetTick();
+  uint32_t tim = 0x10000000;
+  	 //HAL_Delay(100);
 
-  flash_Test();
+
+  while(1)
+  {
+	curTime = HAL_GetTick();
+	tim = 0x1000000;
+	while (tim--)
+	{
+
+	}
+	printf("consume tmie :%d\r\n",HAL_GetTick() - curTime);
+	HAL_Delay(1000);
+  }
+
+  //flash_Test();
   printf("program end\r\n");
   /* USER CODE END 2 */
 

@@ -58,6 +58,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SOFT_SPI_CS_Pin GPIO_PIN_0
+#define SOFT_SPI_CS_GPIO_Port GPIOC
+#define SOFT_SPI_MOSI_Pin GPIO_PIN_1
+#define SOFT_SPI_MOSI_GPIO_Port GPIOC
+#define HW_RESET_Pin GPIO_PIN_1
+#define HW_RESET_GPIO_Port GPIOA
 #define SPI1_CS_Pin GPIO_PIN_4
 #define SPI1_CS_GPIO_Port GPIOA
 #define IIC_SCL_A_Pin GPIO_PIN_4
