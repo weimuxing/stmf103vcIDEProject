@@ -90,7 +90,7 @@ bool status_Register_WIP_Wait()
 {
 	uint8_t status_Register;
 	curSysTick = HAL_GetTick();
-
+	printf("_flashWaitTime:%d \r\n", _flashWaitTime);
 	while (_flashWaitTime)
 	{
 		read_Status_Register_1(&status_Register);
@@ -99,12 +99,14 @@ bool status_Register_WIP_Wait()
 			return true;
 		}
 
-//		if (msAPI_Timer_DiffTime_2(curSysTick, HAL_GetTick()) > _flashWaitTime)
-//		{
-//			curSysTick = HAL_GetTick();
-//			return false;
-//		}
+		if (HAL_GetTick() - curSysTick > _flashWaitTime)
+		{
+			break;
+		}
+
 	}
+	printf("Warring WIP_Wait TimeOut %u\r\n",
+			(uint32_t) (HAL_GetTick() - curSysTick));
 	return false;
 }
 
@@ -115,7 +117,6 @@ void sector_Erase(uint32_t blk_addr)
 	status_Register_WIP_Wait();
 	write_Enable();
 	BIG2LITTLE32(blk_addr);
-
 
 	SPI1_CS_LOW;
 	SPI_Transmit((uint8_t*) &commond, 1, 0xFF);
@@ -133,7 +134,6 @@ void block_Erase(uint32_t blk_addr)
 	status_Register_WIP_Wait();
 	write_Enable();
 	BIG2LITTLE32(blk_addr);
-
 
 	SPI1_CS_LOW;
 	SPI_Transmit((uint8_t*) &commond, 1, 0xFF);
@@ -156,12 +156,11 @@ void page_Program(uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 {
 	uint8_t commond = 0x02;
 
-	printf("ppaddr:%x\r\n",blk_addr);
-	status_Register_WIP_Wait();
-
-	write_Enable();
+	printf("ppaddr:%x\r\n", blk_addr);
 	BIG2LITTLE32(blk_addr);
-
+	status_Register_WIP_Wait();
+	write_Enable();
+	printf("ppaddr:%x\r\n", blk_addr);
 
 	SPI1_CS_LOW;
 	SPI_Transmit(&commond, 1, 0xFF);
@@ -247,7 +246,9 @@ void flash_Write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 {
 	uint32_t curSector;
 	uint32_t remainSector = 0;
+	uint32_t tmp;
 
+	tmp = tmp;
 	curSector = blk_addr / FLASH_SECORT_LEN;
 	remainSector = FLASH_SECORT_LEN - blk_addr % FLASH_SECORT_LEN;
 
@@ -263,17 +264,16 @@ void flash_Write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 			read_Data(eeprom_Cache, curSector * FLASH_SECORT_LEN,
 			FLASH_SECORT_LEN);
 
-			memcpy((uint8_t*) (eeprom_Cache + blk_addr % FLASH_SECORT_LEN), buf,
+			memcpy((eeprom_Cache + blk_addr % FLASH_SECORT_LEN), buf,
 					remainSector);
 			sector_Erase(blk_addr);
-
 			printf("0x00\r\n");
 
 		}
 		else if (remainSector == FLASH_BLOCK_LEN)
 		{
 			//TODO: erase block function
-			block_Erase( blk_addr);
+			block_Erase(blk_addr);
 			printf("0x01\r\n");
 		}
 		else
@@ -301,6 +301,7 @@ void flash_Write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 		}
 
 		printf("w25qxx Debug(4)\r\n");
+		blk_addr += remainSector;
 		buf += remainSector;
 		blk_len -= remainSector;
 		curSector += 1;
@@ -325,6 +326,7 @@ uint8_t flash_Data[0x1000];
 void flash_Test()
 {
 	uint16_t tmp;
+	uint32_t addr = 0x1;
 
 	printf("test2\r\n");
 
@@ -333,9 +335,9 @@ void flash_Test()
 		flash_Data[tmp] = (tmp + 1) % 0x100;
 	}
 
-	flash_Write(0x00, flash_Data, 0, sizeof(flash_Data));
+	flash_Write(0x00, flash_Data, addr, sizeof(flash_Data) - 1);
 
-	read_Data(flash_Data, 0, sizeof(flash_Data));
+	read_Data(flash_Data, addr, sizeof(flash_Data));
 
 	for (tmp = 0; tmp < sizeof(flash_Data); tmp++)
 	{
