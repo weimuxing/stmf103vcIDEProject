@@ -68,6 +68,14 @@
 #define STORAGE_BLK_SIZ                  0x200
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
+#define STORAGE_BLK_NBR_0		0x1000
+#define STORAGE_BLK_SIZ_0		0x1000
+#define STORAGE_BLK_NBR_1		0x200
+#define STORAGE_BLK_SIZ_1		0x1000
+#define STORAGE_BLK_NBR_2		0x1000
+#define STORAGE_BLK_SIZ_2		0x1000
+#define STORAGE_BLK_NBR_3		0x1000
+#define STORAGE_BLK_SIZ_3		0x1000
 
 /* USER CODE END PRIVATE_DEFINES */
 
@@ -192,8 +200,31 @@ int8_t STORAGE_Init_FS(uint8_t lun)
 int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_size)
 {
   /* USER CODE BEGIN 3 */
-  *block_num  = STORAGE_BLK_NBR;
-  *block_size = STORAGE_BLK_SIZ;
+	if(lun == 0)
+	{
+		printf("GetCapacity_FS lun:0\r\n");
+		*block_num  = STORAGE_BLK_NBR_0;
+		*block_size = STORAGE_BLK_SIZ_0;
+	}
+	else if(lun == 1)
+	{
+		printf("GetCapacity_FS lun:1\r\n");
+		*block_num  = STORAGE_BLK_NBR_1;
+		*block_size = STORAGE_BLK_SIZ_1;
+	}
+	else if(lun == 2)
+	{
+		printf("GetCapacity_FS lun:2\r\n");
+		*block_num  = STORAGE_BLK_NBR_2;
+		*block_size = STORAGE_BLK_SIZ_2;
+	}
+	else
+	{
+		printf("GetCapacity_FS lun:else\r\n");
+		*block_num  = STORAGE_BLK_NBR_3;
+		*block_size = STORAGE_BLK_SIZ_3;
+	}
+
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -230,6 +261,26 @@ int8_t STORAGE_IsWriteProtected_FS(uint8_t lun)
 int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 6 */
+	if(lun == 0)
+	{
+		//printf("Re lun:0 blk_addr:%x blk_len:%u\r\n",blk_addr,blk_len);
+		read_Data(buf,  blk_addr*STORAGE_BLK_NBR_0,  blk_len*STORAGE_BLK_NBR_0);
+	}
+	else if(lun == 1)
+	{
+		printf("Re1\r\n");
+
+	}
+	else if(lun == 2)
+	{
+		printf("Re2\r\n");
+
+	}
+	else
+	{
+		printf("Reelse\r\n");
+
+	}
   return (USBD_OK);
   /* USER CODE END 6 */
 }
@@ -242,6 +293,26 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 7 */
+	if(lun == 0)
+	{
+		printf("W:0 blk_len:%d",blk_len);
+		flash_Write( lun, buf,  blk_addr*STORAGE_BLK_NBR_0,  blk_len*STORAGE_BLK_NBR_0);
+	}
+	else if(lun == 1)
+	{
+		printf("Write_FS lun:1\r\n");
+
+	}
+	else if(lun == 2)
+	{
+		printf("Write_FS lun:2\r\n");
+
+	}
+	else
+	{
+		printf("Write_FS lun:else\r\n");
+
+	}
   return (USBD_OK);
   /* USER CODE END 7 */
 }

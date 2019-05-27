@@ -10,6 +10,15 @@
 
 #include "main.h"
 
+#define XX25X8  8
+#define XX25X16 16
+#define XX25X32 32
+#define XX25X64 64
+#define XX25X128 128
+#define XX25X256 256
+
+
+
 #define FLASH_PAGE_LEN   0x100
 #define FLASH_SECORT_LEN 0x1000
 #define FLASH_SECORT_COUNT  0x1000
@@ -38,7 +47,5 @@
 		(( (uint32_t)(x) & 0x000000ff) << 24));	\
 }while(0);
 
-
-extern SPI_HandleTypeDef hspi1;
 
 #endif /* INC_BSP_FLASH_H_ */

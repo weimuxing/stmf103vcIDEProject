@@ -13,21 +13,14 @@ static uint32_t _flashWaitTime = PAGEPROGRAMTIME;
 static uint32_t curSysTick;
 static uint8_t eeprom_Cache[0x1000];
 
-void SPI_Transmit(uint8_t* pData, uint16_t Size, uint32_t Timeout)
+typedef struct
 {
-	HAL_SPI_Transmit(&hspi1, pData, Size, Timeout);
-}
 
-void SPI_Receive(uint8_t* pData, uint16_t Size, uint32_t Timeout)
-{
-	HAL_SPI_Receive(&hspi1, pData, Size, Timeout);
-}
 
-void SPI_TransmitReceive(uint8_t* pTxData, uint8_t* pRxData, uint16_t Size,
-		uint32_t Timeout)
-{
-	HAL_SPI_TransmitReceive(&hspi1, pTxData, pRxData, Size, Timeout);
-}
+
+
+} SPIFLASH_INFO_Typedef;
+
 
 void write_Enable()
 {
@@ -284,7 +277,7 @@ void flash_Write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 	}
 }
 
-#if 0
+#if 1
 uint8_t flash_Data[0x1000];
 void flash_Test()
 {
