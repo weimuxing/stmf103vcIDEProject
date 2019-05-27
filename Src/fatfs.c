@@ -33,7 +33,15 @@ void MX_FATFS_Init(void)
   retUSER = FATFS_LinkDriver(&USER_Driver, USERPath);
 
   /* USER CODE BEGIN Init */
-  /* additional user code for init */     
+  /* additional user code for init */
+  if(retUSER)
+  {
+	  printf("fatfs init error\r\n");
+  }
+  else
+  {
+	  printf("fatfs init sucess!!!!\r\n");
+  }
   /* USER CODE END Init */
 }
 

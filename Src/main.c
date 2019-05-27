@@ -20,7 +20,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
 #include "fatfs.h"
 #include "spi.h"
 #include "usart.h"
@@ -55,7 +54,6 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -97,40 +95,18 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_USART1_UART_Init();
+  MX_USB_DEVICE_Init();
   MX_USART2_UART_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
   printf("program start\r\n");
 
   //eeprom_Test();
-  //read_Manufacturer_Device_ID();
-  uint32_t curTime = HAL_GetTick();
-  uint32_t tim = 0x10000000;
-  	 //HAL_Delay(100);
-
-
-  while(1)
-  {
-	curTime = HAL_GetTick();
-	tim = 0x1000000;
-	while (tim--)
-	{
-
-	}
-	printf("consume tmie :%d\r\n",HAL_GetTick() - curTime);
-	HAL_Delay(1000);
-  }
-
+  read_Manufacturer_Device_ID();
   //flash_Test();
+
   printf("program end\r\n");
   /* USER CODE END 2 */
-
-  /* Call init function for freertos objects (in freertos.c) */
-  MX_FREERTOS_Init();
-
-  /* Start scheduler */
-  osKernelStart();
-  
-  /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */

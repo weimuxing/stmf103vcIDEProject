@@ -68,14 +68,7 @@
 #define STORAGE_BLK_SIZ                  0x200
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
-#define STORAGE_BLK_NBR_0		0x1000
-#define STORAGE_BLK_SIZ_0		0x1000
-#define STORAGE_BLK_NBR_1		0x200
-#define STORAGE_BLK_SIZ_1		0x1000
-#define STORAGE_BLK_NBR_2		0x1000
-#define STORAGE_BLK_SIZ_2		0x1000
-#define STORAGE_BLK_NBR_3		0x1000
-#define STORAGE_BLK_SIZ_3		0x1000
+
 
 /* USER CODE END PRIVATE_DEFINES */
 
@@ -295,7 +288,7 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
   /* USER CODE BEGIN 7 */
 	if(lun == 0)
 	{
-		printf("W:0 blk_len:%d",blk_len);
+		printf("W:0 blk_len:%d\r\n",blk_len);
 		flash_Write( lun, buf,  blk_addr*STORAGE_BLK_NBR_0,  blk_len*STORAGE_BLK_NBR_0);
 	}
 	else if(lun == 1)

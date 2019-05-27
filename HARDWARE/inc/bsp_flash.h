@@ -10,14 +10,22 @@
 
 #include "main.h"
 
+
+#define STORAGE_BLK_NBR_0		0x1000
+#define STORAGE_BLK_SIZ_0		0x1000
+#define STORAGE_BLK_NBR_1		0x200
+#define STORAGE_BLK_SIZ_1		0x1000
+#define STORAGE_BLK_NBR_2		0x1000
+#define STORAGE_BLK_SIZ_2		0x1000
+#define STORAGE_BLK_NBR_3		0x1000
+#define STORAGE_BLK_SIZ_3		0x1000
+
 #define XX25X8  8
 #define XX25X16 16
 #define XX25X32 32
 #define XX25X64 64
 #define XX25X128 128
 #define XX25X256 256
-
-
 
 #define FLASH_PAGE_LEN   0x100
 #define FLASH_SECORT_LEN 0x1000

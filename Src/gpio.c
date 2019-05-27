@@ -49,11 +49,11 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, SOFT_SPI_CS_Pin|IIC_SCL_A_Pin|IIC_SDA_A_Pin|IIC_SCL_B_Pin 
+  HAL_GPIO_WritePin(GPIOC, SOFT_SPI0_CS_Pin|IIC_SCL_A_Pin|IIC_SDA_A_Pin|IIC_SCL_B_Pin 
                           |IIC_SDA_B_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, SOFT_SPI_MOSI_Pin|GPIO_PIN_2|GPIO_PIN_3, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, SOFT_SPI0_MOSI_Pin|SOFT_SPI0_MISO_Pin|SOFT_SPI_CLK_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(HW_RESET_GPIO_Port, HW_RESET_Pin, GPIO_PIN_RESET);
@@ -64,19 +64,19 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(Status_LED_GPIO_Port, Status_LED_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PCPin PCPin PC2 */
-  GPIO_InitStruct.Pin = SOFT_SPI_CS_Pin|SOFT_SPI_MOSI_Pin|GPIO_PIN_2;
+  /*Configure GPIO pins : PCPin PCPin PCPin */
+  GPIO_InitStruct.Pin = SOFT_SPI0_CS_Pin|SOFT_SPI0_MOSI_Pin|SOFT_SPI0_MISO_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PC3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = SOFT_SPI_CLK_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_Init(SOFT_SPI_CLK_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = HW_RESET_Pin;
