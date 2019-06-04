@@ -74,6 +74,14 @@ void Error_Handler(void);
 #define IIC_SCL_A_GPIO_Port GPIOC
 #define IIC_SDA_A_Pin GPIO_PIN_5
 #define IIC_SDA_A_GPIO_Port GPIOC
+#define LCD_RS_Pin GPIO_PIN_13
+#define LCD_RS_GPIO_Port GPIOE
+#define LCD_RESET_Pin GPIO_PIN_14
+#define LCD_RESET_GPIO_Port GPIOE
+#define LCD_BL_EN_Pin GPIO_PIN_15
+#define LCD_BL_EN_GPIO_Port GPIOE
+#define LCD_CS_Pin GPIO_PIN_12
+#define LCD_CS_GPIO_Port GPIOB
 #define GPIOD_EXTI15_Pin GPIO_PIN_15
 #define GPIOD_EXTI15_GPIO_Port GPIOD
 #define IIC_SCL_B_Pin GPIO_PIN_8
@@ -89,6 +97,12 @@ typedef enum
 {
 	false = 0, true,
 } bool;
+
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

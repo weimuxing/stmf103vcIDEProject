@@ -11,7 +11,7 @@
 #include "main.h"
 
 
-#define STORAGE_BLK_NBR_0		0x1000
+#define STORAGE_BLK_NBR_0		(0x1000 - 0x01)
 #define STORAGE_BLK_SIZ_0		0x1000
 #define STORAGE_BLK_NBR_1		0x200
 #define STORAGE_BLK_SIZ_1		0x1000

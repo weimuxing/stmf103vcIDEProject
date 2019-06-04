@@ -195,7 +195,7 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
   /* USER CODE BEGIN 3 */
 	if(lun == 0)
 	{
-		printf("GetCapacity_FS lun:0\r\n");
+		printf("lun:0\r\n");
 		*block_num  = STORAGE_BLK_NBR_0;
 		*block_size = STORAGE_BLK_SIZ_0;
 	}

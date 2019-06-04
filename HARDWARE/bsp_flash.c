@@ -277,7 +277,7 @@ void flash_Write(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint32_t blk_len)
 	}
 }
 
-#if 1
+#if 0
 uint8_t flash_Data[0x1000];
 void flash_Test()
 {

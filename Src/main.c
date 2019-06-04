@@ -20,7 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "fatfs.h"
+#include "cmsis_os.h"
 #include "spi.h"
 #include "usart.h"
 #include "usb_device.h"
@@ -54,6 +54,7 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -95,9 +96,7 @@ int main(void)
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_USART1_UART_Init();
-  MX_USB_DEVICE_Init();
   MX_USART2_UART_Init();
-  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
   printf("program start\r\n");
 
@@ -105,8 +104,19 @@ int main(void)
   read_Manufacturer_Device_ID();
   //flash_Test();
 
+  //mount_disk();
+  Lcd_Init();
+  
   printf("program end\r\n");
   /* USER CODE END 2 */
+
+  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+  
+  /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -199,7 +209,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+	printf("Error_Handler\r\n");
   /* USER CODE END Error_Handler_Debug */
 }
 

@@ -259,19 +259,19 @@ void soft_SPI_TransmitReceive(soft_SPI_HandleTypeDef *sspi1, uint8_t *pTxData,
 
 }
 
-void SPI_Transmit(uint8_t* pData, uint16_t Size, uint32_t Timeout)
+void SPI_Transmit(SPI_HandleTypeDef *hspi , uint8_t* pData, uint16_t Size, uint32_t Timeout)
 {
-	HAL_SPI_Transmit(&hspi1, pData, Size, Timeout);
+	HAL_SPI_Transmit(hspi, pData, Size, Timeout);
 }
 
-void SPI_Receive(uint8_t* pData, uint16_t Size, uint32_t Timeout)
+void SPI_Receive(SPI_HandleTypeDef *hspi , uint8_t* pData, uint16_t Size, uint32_t Timeout)
 {
-	HAL_SPI_Receive(&hspi1, pData, Size, Timeout);
+	HAL_SPI_Receive(hspi, pData, Size, Timeout);
 }
 
-void SPI_TransmitReceive(uint8_t* pTxData, uint8_t* pRxData, uint16_t Size,
+void SPI_TransmitReceive(SPI_HandleTypeDef *hspi , uint8_t* pTxData, uint8_t* pRxData, uint16_t Size,
 		uint32_t Timeout)
 {
-	HAL_SPI_TransmitReceive(&hspi1, pTxData, pRxData, Size, Timeout);
+	HAL_SPI_TransmitReceive(hspi, pTxData, pRxData, Size, Timeout);
 }
 
